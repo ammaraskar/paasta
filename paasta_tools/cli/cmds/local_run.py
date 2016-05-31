@@ -562,6 +562,12 @@ def run_docker_container(
         else:
             status = True
 
+        if not status:
+            sys.stdout.write('Your service failed to start, here is the stdout and stderr\n')
+            sys.stdout.write(PaastaColors.grey(
+                docker_client.attach(container_id, stderr=True, stream=False, logs=True)
+            ))
+
         if healthcheck_only:
             sys.stdout.write('Detected --healthcheck-only flag, exiting now.\n')
             if container_started:
@@ -577,10 +583,6 @@ def run_docker_container(
             for line in docker_client.attach(container_id, stderr=True, stream=True, logs=True):
                 sys.stdout.write(PaastaColors.grey(line))
         else:
-            sys.stdout.write('Your service failed to start, here is the stdout and stderr\n')
-            sys.stdout.write(PaastaColors.grey(
-                docker_client.attach(container_id, stderr=True, stream=False, logs=True)
-            ))
             raise KeyboardInterrupt
 
     except KeyboardInterrupt:
